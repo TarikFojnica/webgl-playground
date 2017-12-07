@@ -10,32 +10,98 @@
 </head>
 <body>
 <div>
-	<button style="position: absolute; z-index: 999" onclick="startRotating()">Start Rotating</button>
+	<div id="container">
+	</div>
 </div>
 <script src="js/three.js"></script>
 <script>
-	const scene = new THREE.Scene();
-	const camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 1000 );
+	const loader = new THREE.TextureLoader();
+	const container = document.querySelector('#container');
 	const renderer = new THREE.WebGLRenderer();
-	renderer.setSize( window.innerWidth, window.innerHeight );
-	document.body.appendChild( renderer.domElement );
+	const WIDTH = window.innerWidth;
+	const HEIGHT = window.innerHeight;
+	renderer.setSize(WIDTH, HEIGHT);
 
-	const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-	const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-	const cube = new THREE.Mesh( geometry, material );
-	scene.add( cube );
+	const VIEW_ANGLE = 45;
+	const ASPECT = WIDTH / HEIGHT;
+	const NEAR = 0.1;
+	const FAR = 1000;
+	const camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+	camera.position.set( 0, 0, 500 );
 
-	camera.position.z = 5;
 
-	function animate() {
-		requestAnimationFrame( animate );
-		renderer.render( scene, camera );
+	const scene = new THREE.Scene();
+	const backgroundTexture = loader.load('./assets/seamless space_0.PNG');
+	backgroundTexture.wrapS = THREE.RepeatWrapping;
+	backgroundTexture.wrapT = THREE.RepeatWrapping;
+	backgroundTexture.repeat.set( 5, 5 );
+	scene.background = backgroundTexture;
+
+	scene.add(camera);
+	container.appendChild(renderer.domElement);
+
+	// Create a Sphere
+	const RADIUS = 200;
+	const SEGMENTS = 50;
+	const RINGS = 50;
+	const globe = new THREE.Group();
+
+	// Add globe to the Scene
+	scene.add(globe);
+	loader.load( './assets/land_ocean_ice_cloud_2048.jpg', function ( texture ) {
+
+		// Create the sphere
+		var sphere = new THREE.SphereGeometry( RADIUS, SEGMENTS, RINGS );
+
+		// Map the texture to the material.
+		var material = new THREE.MeshBasicMaterial( { map: texture, overdraw: 0.5 } );
+
+		// Create a new mesh with sphere geometry.
+		var mesh = new THREE.Mesh( sphere, material );
+
+		// Add mesh to globe
+		globe.add(mesh);
+	} );
+
+	globe.position.z = -300;
+
+	const pointLight = new THREE.PointLight(0xFFFFFF);
+	pointLight.position.x = 10;
+	pointLight.position.y = 50;
+	pointLight.position.z = 400;
+	scene.add(pointLight);
+
+	function update () {
+
+		//Render:
+		renderer.render(scene, camera);
+
+		// Schedule the next frame:
+		requestAnimationFrame(update);
 	}
-	animate();
 
-	function startRotating() {
-		cube.rotation.x += 0.05;
-		cube.rotation.y += 0.05;
+	// Schedule the first frame:
+	requestAnimationFrame(update);
+
+	function animationBuilder(direction) {
+		return function animateRotate() {
+			switch (direction) {
+				case 'up':
+					globe.rotation.x -= 0.2;
+					break;
+				case 'down':
+					globe.rotation.x += 0.2;
+					break;
+				case 'left':
+					globe.rotation.y -= 0.2;
+					break;
+				case 'right':
+					globe.rotation.y += 0.2;
+					break;
+				default:
+					break;
+			}
+		}
 	}
 </script>
 </body>
