@@ -2,24 +2,34 @@
 <html>
 <head>
 	<meta charset=utf-8>
-	<title>3D Clock</title>
+	<title>WebGL Experiments</title>
 	<style>
 		body { margin: 0; }
-		canvas { width: 100%; height: 100% }
+		canvas { width: 100%; height: 100%; display: block }
 	</style>
+	<link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body>
-<div>
-	<div id="container">
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-7">
+			<div class="globe-container" id="globe-container">
+			</div>
+		</div>
+		<div class="col-md-5">
+			<div class="controls-container">
+				<h1>WebGL Experiments</h1>
+			</div>
+		</div>
 	</div>
 </div>
 <script src="js/three.js"></script>
 <script>
 	const loader = new THREE.TextureLoader();
-	const container = document.querySelector('#container');
+	const container = document.querySelector('#globe-container');
 	const renderer = new THREE.WebGLRenderer();
-	const WIDTH = window.innerWidth;
-	const HEIGHT = window.innerHeight;
+	const WIDTH = document.getElementById('globe-container').offsetWidth;
+	const HEIGHT = document.getElementById('globe-container').offsetHeight;
 	renderer.setSize(WIDTH, HEIGHT);
 
 	const VIEW_ANGLE = 45;
@@ -31,14 +41,16 @@
 
 
 	const scene = new THREE.Scene();
-	const backgroundTexture = loader.load('./assets/seamless space_0.PNG');
+	const backgroundTexture = loader.load('./assets/images/seamless_space_0.PNG');
 	backgroundTexture.wrapS = THREE.RepeatWrapping;
 	backgroundTexture.wrapT = THREE.RepeatWrapping;
-	backgroundTexture.repeat.set( 5, 5 );
+	backgroundTexture.repeat.set( 2, 2 );
 	scene.background = backgroundTexture;
 
 	scene.add(camera);
 	container.appendChild(renderer.domElement);
+
+	const light = new THREE.AmbientLight( 0x404040 );
 
 	// Create a Sphere
 	const RADIUS = 200;
@@ -48,7 +60,7 @@
 
 	// Add globe to the Scene
 	scene.add(globe);
-	loader.load( './assets/land_ocean_ice_cloud_2048.jpg', function ( texture ) {
+	loader.load( './assets/images/land_ocean_ice_cloud_2048.jpg', function ( texture ) {
 
 		// Create the sphere
 		var sphere = new THREE.SphereGeometry( RADIUS, SEGMENTS, RINGS );
@@ -71,38 +83,15 @@
 	pointLight.position.z = 400;
 	scene.add(pointLight);
 
-	function update () {
+	var animate = function () {
+		requestAnimationFrame( animate );
 
-		//Render:
+		globe.rotation.y += 0.008;
+
 		renderer.render(scene, camera);
+	};
 
-		// Schedule the next frame:
-		requestAnimationFrame(update);
-	}
-
-	// Schedule the first frame:
-	requestAnimationFrame(update);
-
-	function animationBuilder(direction) {
-		return function animateRotate() {
-			switch (direction) {
-				case 'up':
-					globe.rotation.x -= 0.2;
-					break;
-				case 'down':
-					globe.rotation.x += 0.2;
-					break;
-				case 'left':
-					globe.rotation.y -= 0.2;
-					break;
-				case 'right':
-					globe.rotation.y += 0.2;
-					break;
-				default:
-					break;
-			}
-		}
-	}
+	animate();
 </script>
 </body>
 </html>
