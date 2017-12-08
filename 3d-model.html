@@ -25,7 +25,7 @@
 </div>
 <script src="js/three.js"></script>
 <script>
-	const loader = new THREE.TextureLoader();
+	const jsonLoader = new THREE.JSONLoader();
 	const container = document.querySelector('#globe-container');
 	const renderer = new THREE.WebGLRenderer();
 	const WIDTH = document.getElementById('globe-container').offsetWidth;
@@ -50,7 +50,9 @@
 	scene.add(camera);
 	container.appendChild(renderer.domElement);
 
+	// LIGHTS
 	const light = new THREE.AmbientLight( 0x404040 );
+	scene.add(light);
 
 	// Create a Sphere
 	const RADIUS = 200;
@@ -60,20 +62,6 @@
 
 	// Add globe to the Scene
 	scene.add(globe);
-	loader.load( './assets/images/land_ocean_ice_cloud_2048.jpg', function ( texture ) {
-
-		// Create the sphere
-		var sphere = new THREE.SphereGeometry( RADIUS, SEGMENTS, RINGS );
-
-		// Map the texture to the material.
-		var material = new THREE.MeshBasicMaterial( { map: texture, overdraw: 0.5 } );
-
-		// Create a new mesh with sphere geometry.
-		var mesh = new THREE.Mesh( sphere, material );
-
-		// Add mesh to globe
-		globe.add(mesh);
-	} );
 
 	globe.position.z = -300;
 
