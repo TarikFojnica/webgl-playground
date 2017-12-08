@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset=utf-8>
+	<title>WebGL Experiments</title>
+	<style>
+		body { margin: 0; }
+		canvas { width: 100%; height: 100%; display: block }
+	</style>
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-8">
+			<div class="globe-container" id="globe-container">
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="controls-container">
+				<h1>WebGL Experiments</h1>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="js/three.js"></script>
+<script>
+	const loader = new THREE.TextureLoader();
+	const container = document.querySelector('#globe-container');
+	const renderer = new THREE.WebGLRenderer();
+	const WIDTH = document.getElementById('globe-container').offsetWidth;
+	const HEIGHT = document.getElementById('globe-container').offsetHeight;
+	renderer.setSize(WIDTH, HEIGHT);
+
+	const VIEW_ANGLE = 45;
+	const ASPECT = WIDTH / HEIGHT;
+	const NEAR = 0.1;
+	const FAR = 1000;
+	const camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+	camera.position.set( 0, 0, 500 );
+
+
+	const scene = new THREE.Scene();
+	const backgroundTexture = loader.load('./assets/images/seamless_space_0.PNG');
+	backgroundTexture.wrapS = THREE.RepeatWrapping;
+	backgroundTexture.wrapT = THREE.RepeatWrapping;
+	backgroundTexture.repeat.set( 2, 2 );
+	scene.background = backgroundTexture;
+
+	scene.add(camera);
+	container.appendChild(renderer.domElement);
+
+	const light = new THREE.AmbientLight( 0x404040 );
+
+	// Create a Sphere
+	const RADIUS = 200;
+	const SEGMENTS = 50;
+	const RINGS = 50;
+	const globe = new THREE.Group();
+
+	// Add globe to the Scene
+	scene.add(globe);
+	loader.load( './assets/images/land_ocean_ice_cloud_2048.jpg', function ( texture ) {
+
+		// Create the sphere
+		var sphere = new THREE.SphereGeometry( RADIUS, SEGMENTS, RINGS );
+
+		// Map the texture to the material.
+		var material = new THREE.MeshBasicMaterial( { map: texture, overdraw: 0.5 } );
+
+		// Create a new mesh with sphere geometry.
+		var mesh = new THREE.Mesh( sphere, material );
+
+		// Add mesh to globe
+		globe.add(mesh);
+	} );
+
+	globe.position.z = -300;
+
+	const pointLight = new THREE.PointLight(0xFFFFFF);
+	pointLight.position.x = 10;
+	pointLight.position.y = 50;
+	pointLight.position.z = 400;
+	scene.add(pointLight);
+
+	var animate = function () {
+		requestAnimationFrame( animate );
+
+		globe.rotation.y += 0.008;
+
+		renderer.render(scene, camera);
+	};
+
+	animate();
+</script>
+</body>
+</html>
