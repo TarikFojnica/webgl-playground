@@ -10,22 +10,16 @@
 	<link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body>
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-md-8">
-			<div class="globe-container" id="globe-container">
-			</div>
-		</div>
-		<div class="col-md-4">
-			<div class="controls-container">
-				<h1>WebGL Experiments</h1>
-			</div>
-		</div>
-	</div>
+<div class="globe-container" id="globe-container">
 </div>
 <script src="js/three.js"></script>
 <script>
-	const jsonLoader = new THREE.JSONLoader();
+	const propSound = new Audio(['assets/sound/propeler-sound.mp3']);
+	propSound.loop = true;
+//	propSound.play();
+
+	const loader = new THREE.TextureLoader();
+	const objectLoader = new THREE.ObjectLoader();
 	const container = document.querySelector('#globe-container');
 	const renderer = new THREE.WebGLRenderer();
 	const WIDTH = document.getElementById('globe-container').offsetWidth;
@@ -39,31 +33,31 @@
 	const camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
 	camera.position.set( 0, 0, 500 );
 
-
 	const scene = new THREE.Scene();
-	const backgroundTexture = loader.load('./assets/images/seamless_space_0.PNG');
+	let backgroundTexture = loader.load('./assets/images/Sky_Above_Clouds_Background-851.jpg');
 	backgroundTexture.wrapS = THREE.RepeatWrapping;
 	backgroundTexture.wrapT = THREE.RepeatWrapping;
-	backgroundTexture.repeat.set( 2, 2 );
+	backgroundTexture.repeat.set( 1, 1 );
 	scene.background = backgroundTexture;
 
 	scene.add(camera);
 	container.appendChild(renderer.domElement);
 
-	// LIGHTS
-	const light = new THREE.AmbientLight( 0x404040 );
-	scene.add(light);
+	const ambient = new THREE.AmbientLight( 0x444444 );
+	scene.add(ambient);
 
-	// Create a Sphere
-	const RADIUS = 200;
-	const SEGMENTS = 50;
-	const RINGS = 50;
-	const globe = new THREE.Group();
+	let loadedModel;
+	objectLoader.load('./assets/models/aircraft/blskes-plane.json', function (object) {
+			let directionalLight = new THREE.DirectionalLight( 0xffeedd );
+			directionalLight.position.set( 0, 0, 1 ).normalize();
 
-	// Add globe to the Scene
-	scene.add(globe);
-
-	globe.position.z = -300;
+			object.position.z = 460;
+			object.position.x = 0;
+			object.position.y = -2;
+			object.rotation.y = 1.5;
+			loadedModel = object;
+			scene.add(object);
+	});
 
 	const pointLight = new THREE.PointLight(0xFFFFFF);
 	pointLight.position.x = 10;
@@ -71,12 +65,21 @@
 	pointLight.position.z = 400;
 	scene.add(pointLight);
 
-	var animate = function () {
+	let currentTime = 0;
+	const animate = function () {
 		requestAnimationFrame( animate );
-
-		globe.rotation.y += 0.008;
-
+		loadedModel.rotation.y += 0.01;
 		renderer.render(scene, camera);
+		currentTime += 1;
+		console.log(currentTime);
+		if (currentTime >= 60) {
+//			loadedModel.rotation.x += 0.05;
+//			backgroundTexture = loader.load('./assets/images/land_ocean_ice_cloud_2048.jpg');
+
+			if (currentTime >= 120) {
+				currentTime = 0;
+			}
+		}
 	};
 
 	animate();
