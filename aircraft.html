@@ -43,8 +43,6 @@
 	scene.add(camera);
 	container.appendChild(renderer.domElement);
 
-	const ambient = new THREE.AmbientLight( 0x444444 );
-	scene.add(ambient);
 
 	let loadedModel;
 	objectLoader.load('./assets/models/aircraft/blskes-plane.json', function (object) {
@@ -59,11 +57,19 @@
 			scene.add(object);
 	});
 
-	const pointLight = new THREE.PointLight(0xFFFFFF);
-	pointLight.position.x = 10;
-	pointLight.position.y = 50;
-	pointLight.position.z = 400;
-	scene.add(pointLight);
+	const ambient = new THREE.AmbientLight( 0xffffff, 0.1 );
+	scene.add( ambient );
+	spotLight = new THREE.SpotLight( 0xffffff, 1 );
+	spotLight.position.set( 15, 40, 35 );
+	spotLight.angle = Math.PI / 4;
+	spotLight.penumbra = 0.05;
+	spotLight.decay = 2;
+	spotLight.distance = 200;
+	spotLight.castShadow = true;
+	spotLight.shadow.mapSize.width = 1024;
+	spotLight.shadow.mapSize.height = 1024;
+	spotLight.shadow.camera.near = 10;
+	spotLight.shadow.camera.far = 200;
 
 	let currentTime = 0;
 	const animate = function () {
