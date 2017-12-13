@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset=utf-8>
+	<title>WebGL Experiments</title>
+	<style>
+		body { margin: 0; }
+		canvas { width: 100%; height: 100%; display: block }
+	</style>
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<div class="globe-container" id="globe-container">
+</div>
+<script src="js/three.js"></script>
+<script>
+	const propSound = new Audio(['assets/sound/propeler-sound.mp3']);
+	propSound.loop = true;
+//	propSound.play();
+	let mixer, loaded = false;
+	const loader = new THREE.TextureLoader();
+	const objectLoader = new THREE.ObjectLoader();
+	const container = document.querySelector('#globe-container');
+	const renderer = new THREE.WebGLRenderer();
+	const WIDTH = document.getElementById('globe-container').offsetWidth;
+	const HEIGHT = document.getElementById('globe-container').offsetHeight;
+	renderer.setSize(WIDTH, HEIGHT);
+
+	const VIEW_ANGLE = 45;
+	const ASPECT = WIDTH / HEIGHT;
+	const NEAR = 0.1;
+	const FAR = 1000;
+	const camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+	camera.position.set( 0, 0, 500 );
+
+	const scene = new THREE.Scene();
+	let backgroundTexture = loader.load('./assets/images/Sky_Above_Clouds_Background-851.jpg');
+	backgroundTexture.wrapS = THREE.RepeatWrapping;
+	backgroundTexture.wrapT = THREE.RepeatWrapping;
+	backgroundTexture.repeat.set( 1, 1 );
+	scene.background = backgroundTexture;
+
+	scene.add(camera);
+	container.appendChild(renderer.domElement);
+
+
+	let loadedModel;
+	objectLoader.load('./assets/models/gunbot/gunbot-with-walk-animation.json', function (object) {
+			let directionalLight = new THREE.DirectionalLight( 0xffeedd );
+			directionalLight.position.set( 0, 0, 1 ).normalize();
+
+			object.position.z = 490;
+			object.position.x = 0;
+			mixer = new THREE.AnimationMixer(object);
+			mixer.clipAction( object.animations[ 0 ] ).play();
+			loadedModel = object;
+			scene.add(object);
+	});
+
+
+
+	const ambient = new THREE.AmbientLight( 0xffffff, 0.1 );
+	scene.add( ambient );
+	spotLight = new THREE.SpotLight( 0xffffff, 1 );
+	spotLight.position.set( 15, 40, 35 );
+	spotLight.angle = Math.PI / 4;
+	spotLight.penumbra = 0.05;
+	spotLight.decay = 2;
+	spotLight.distance = 200;
+	spotLight.castShadow = true;
+	spotLight.shadow.mapSize.width = 1024;
+	spotLight.shadow.mapSize.height = 1024;
+	spotLight.shadow.camera.near = 10;
+	spotLight.shadow.camera.far = 200;
+
+	let currentTime = 0;
+	const animate = function () {
+		requestAnimationFrame( animate );
+		loadedModel.rotation.y += 0.01;
+		renderer.render(scene, camera);
+	};
+
+	animate();
+</script>
+</body>
+</html>
